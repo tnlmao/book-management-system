@@ -11,7 +11,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // BookService handles book operations
@@ -35,7 +34,7 @@ func (b *BookService) CreateBook(ctx context.Context, book *models.Book) (bool, 
 	//Marshal to store entry in Redis Cache
 	bookJSON, err := json.Marshal(book)
 	if err == nil {
-		redis.Client.Set(ctx, fmt.Sprintf("books:%d", book.ID), bookJSON, 10*time.Minute)
+		redis.Client.Set(ctx, fmt.Sprintf("books:%d", book.ID), bookJSON, 0)
 	} else {
 		fmt.Println("Failed to update book in Redis:", err)
 		return false, err
@@ -100,7 +99,7 @@ func (b *BookService) GetBooks(ctx context.Context, limit int, offset int) ([]mo
 		// Cache each book individually.
 		for _, book := range books {
 			bookJSON, _ := json.Marshal(book)
-			redis.Client.Set(ctx, fmt.Sprintf("books:%d", book.ID), bookJSON, 10*time.Minute)
+			redis.Client.Set(ctx, fmt.Sprintf("books:%d", book.ID), bookJSON, 0)
 		}
 		return books, nil
 	}
